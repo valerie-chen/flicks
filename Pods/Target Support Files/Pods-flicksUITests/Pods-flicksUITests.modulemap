@@ -1,0 +1,6 @@
+framework module Pods_flicksUITests {
+  umbrella header "Pods-flicksUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
