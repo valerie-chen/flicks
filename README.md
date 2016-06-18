@@ -39,7 +39,7 @@ Network errors and loading state:
 
 <img src='http://imgur.com/R8viip8.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
-GIF created with [LiceCap](http://www.cockos.com/licecap/).
+GIFs created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes
 
