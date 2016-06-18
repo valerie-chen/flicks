@@ -32,9 +32,11 @@ Here's a walkthrough of implemented user stories:
 <img src='http://imgur.com/y29cyex.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 Search:
+
 <img src='http://imgur.com/Gg3MBtj.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 Network errors and loading state:
+
 <img src='http://imgur.com/R8viip8.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
