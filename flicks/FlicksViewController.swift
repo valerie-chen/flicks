@@ -10,12 +10,15 @@ import UIKit
 import AFNetworking
 import MBProgressHUD
 
-class FlicksViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class FlicksViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
 
     @IBOutlet weak var errorView: UIView!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var searchBar: UISearchBar!
     
     var movies: [NSDictionary]?
+    var filteredMovies: [NSDictionary]!
+    
     // Initialize a UIRefreshControl
     let refreshControl = UIRefreshControl()
     
@@ -56,11 +59,14 @@ class FlicksViewController: UIViewController, UITableViewDataSource, UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        errorView.layer.zPosition = 1
+        // allows errorView to appear above cells when necessary
+        errorView.layer.zPosition = 3
+        searchBar.layer.zPosition = 1
         
         refreshControl.addTarget(self, action: #selector(refreshControlAction(_:)), forControlEvents: UIControlEvents.ValueChanged)
         tableView.insertSubview(refreshControl, atIndex: 0)
         
+        searchBar.delegate = self
         tableView.dataSource = self
         tableView.delegate = self
         
@@ -93,6 +99,7 @@ class FlicksViewController: UIViewController, UITableViewDataSource, UITableView
                         data, options:[]) as? NSDictionary {
                             print("response: \(responseDictionary)")
                             self.movies = responseDictionary["results"] as? [NSDictionary]
+                            self.filteredMovies = self.movies
                             self.tableView.reloadData()
                         }
                     self.errorView.hidden = true
@@ -110,8 +117,8 @@ class FlicksViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let movies = movies {
-            return movies.count
+        if let filteredMovies = filteredMovies {
+            return filteredMovies.count
         } else {
             return 0
         }
@@ -120,9 +127,10 @@ class FlicksViewController: UIViewController, UITableViewDataSource, UITableView
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell") as! MovieCell
         
-        let movie = movies![indexPath.row]
+        let movie = filteredMovies![indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
+        let releaseDate = movie["release_date"] as! String
         let posterPath = movie["poster_path"] as! String
         
         let baseURL = "http://image.tmdb.org/t/p/w500/"
@@ -131,10 +139,50 @@ class FlicksViewController: UIViewController, UITableViewDataSource, UITableView
         
         cell.titleLabel.text = title
         cell.overviewLabel.text = overview
+        cell.releaseDateLabel.text = "Released: \(releaseDate)"
         cell.posterView.setImageWithURL(imageURL!)
         
         //print("row \(indexPath.row)")
         return cell
+    }
+    
+//    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+//        filteredMovies = searchText.isEmpty ? movies : movies!.filter({(dataDict: NSDictionary) -> Bool in
+//            let title = dataDict["title"] as! String
+//            return title.rangeOfString(searchText, options: .CaseInsensitiveSearch) != nil
+//        })
+//    }
+    
+    // This method updates filteredData based on the text in the Search Box
+    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        // When there is no text, filteredData is the same as the original data
+        if searchText.isEmpty {
+            filteredMovies = movies
+        } else {
+            // The user has entered text into the search box
+            // Use the filter method to iterate over all items in the data array
+            // For each item, return true if the item should be included and false if the
+            // item should NOT be included
+            filteredMovies = movies!.filter({(dataDict: NSDictionary) -> Bool in
+                let title = dataDict["title"] as! String
+                // If dataItem matches the searchText, return true to include it
+                if title.rangeOfString(searchText, options: .CaseInsensitiveSearch) != nil {
+                    return true
+                } else {
+                    return false
+                }
+            })
+        }
+        tableView.reloadData()
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
+        let destinationViewController = segue.destinationViewController as! MovieDetailsViewController
+        
+        let indexPath = tableView.indexPathForSelectedRow
+        let movie = filteredMovies![indexPath!.row]
+        destinationViewController.movie = movie
+        
     }
 
     /*
